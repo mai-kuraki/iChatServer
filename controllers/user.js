@@ -4,7 +4,7 @@
 const UserModel = require('../models/schema/user');
 module.exports = {
     addUser: async (ctx) => {
-        console.log(ctx)
+        console.log(ctx);
         let user = new UserModel({
             email: 'exp@163.com',
             sex: 0,
