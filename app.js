@@ -2,10 +2,12 @@
  * Created by zhengliuyang on 2018/6/1.
  */
 const Koa = require('koa');
+const cors = require('koa2-cors');
 const router = require('koa-router')();
 const config = require('./config/config.json');
 const userRoute = require('./routes/user');
 const app = new Koa();
+app.use(cors());
 app.use(router.routes());
 router.use(userRoute.routes());
 app.listen(config.port, () => {

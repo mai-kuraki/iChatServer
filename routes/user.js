@@ -5,5 +5,5 @@ const userController = require('../controllers/user');
 const router = require('koa-router')({
     prefix: '/user'
 });
-router.get('/add', userController.addUser);
+router.post('/add', userController.addUser);
 module.exports = router;
