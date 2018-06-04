@@ -17,8 +17,11 @@
   },
   "homepage": "https://github.com/mai-kuraki/iChatServer#readme",
   "dependencies": {
+    "jsonwebtoken": "^8.2.2",
     "koa": "^2.5.1",
     "koa-bodyparser": "^4.2.1",
+    "koa-generic-session": "^2.0.1",
+    "koa-redis": "^3.1.2",
     "koa-router": "^7.4.0",
     "mongoose": "^5.1.3"
   }

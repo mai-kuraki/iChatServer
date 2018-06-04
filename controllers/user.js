@@ -3,6 +3,8 @@
  */
 const UserModel = require('../models/schema/user');
 const crypto = require('crypto');
+const jwt = require('jsonwebtoken');
+const config = require('../config/config.json');
 module.exports = {
     addUser: async (ctx) => {
         let args = ctx.request.body;
@@ -47,6 +49,7 @@ module.exports = {
         }
     },
     login: async (ctx) => {
+        let session = ctx.session;
         let args = ctx.request.body;
         let res = await new Promise((resolve, reject) => {
             UserModel.findOne({email: args.email}, (error, data) => {
@@ -56,7 +59,17 @@ module.exports = {
                 if(data) {
                     let password = crypto.createHash('sha1').update(args.password).digest('hex');
                     if(password === data.pass) {
-                        resolve({code: 200, msg: 'login success!'});
+                        let profile = {
+                            email: data.email,
+                            sex: data.sex,
+                            nick: data.nick,
+                            avator: data.avator,
+                            birthday: new Date(data.birthday).getTime(),
+                        };
+                        let token = jwt.sign(profile, config.jwtCert, { expiresIn: '12h' });
+                        session[token] = new Date().getTime();
+                        console.log(session)
+                        resolve({code: 200, msg: 'login success!', token: token});
                     }else {
                         resolve({code: 501, msg: 'email or password error'});
                     }

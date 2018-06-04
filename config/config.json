@@ -4,5 +4,11 @@
         "port": 27017,
         "dbName": "ichat"
     },
-    "port": 7800
+    "redis": {
+        "host": "127.0.0.1",
+        "port": 6379,
+        "db": 1
+    },
+    "port": 7800,
+    "jwtCert": "f8e38bb17a4b481898"
 }
