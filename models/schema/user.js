@@ -6,6 +6,7 @@ const {mongoClient} = require('../mongo');
 
 const userSchema = new Schema(
     {
+        uid: String,
         email: String,
         sex: Number,
         pass: String,

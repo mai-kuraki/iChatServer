@@ -5,10 +5,12 @@ const UserModel = require('../models/schema/user');
 const crypto = require('crypto');
 const jwt = require('jsonwebtoken');
 const config = require('../config/config.json');
+const cuid = require('cuid');
 module.exports = {
     addUser: async (ctx) => {
         let args = ctx.request.body;
         let user = new UserModel({
+            uid: cuid(),
             email: args.email || '',
             sex: 0,
             pass: crypto.createHash('sha1').update(args.password).digest('hex'),
@@ -60,16 +62,16 @@ module.exports = {
                     let password = crypto.createHash('sha1').update(args.password).digest('hex');
                     if(password === data.pass) {
                         let profile = {
+                            uid: data.uid,
                             email: data.email,
                             sex: data.sex,
                             nick: data.nick,
                             avator: data.avator,
                             birthday: new Date(data.birthday).getTime(),
                         };
-                        let token = jwt.sign(profile, config.jwtCert, { expiresIn: '12h' });
-                        session[token] = new Date().getTime();
-                        console.log(session)
-                        resolve({code: 200, msg: 'login success!', token: token});
+                        let webToken = jwt.sign(profile, config.jwtCert, { expiresIn: '12h' });
+                        session[webToken] = new Date().getTime();
+                        resolve({code: 200, msg: 'login success!', token: webToken});
                     }else {
                         resolve({code: 501, msg: 'email or password error'});
                     }
@@ -79,5 +81,14 @@ module.exports = {
             })
         });
         ctx.body = res;
+    },
+    logout: (ctx) => {
+        let webToken = ctx.request.headers.webToken;
+        let session = ctx.session;
+        session[webToken] = null;
+        ctx.body = {
+            code: 200,
+            msg: 'logout success!'
+        }
     }
 };

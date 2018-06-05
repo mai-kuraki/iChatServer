@@ -8,6 +8,7 @@ const router = require('koa-router')();
 const bodyParser = require('koa-bodyparser');
 const config = require('./config/config.json');
 const userRoute = require('./routes/user');
+const interception = require('./middleWare/interception');
 const app = new Koa();
 const store = redisStore({
     host: config.redis.host,
@@ -26,6 +27,8 @@ store.on('connect', () => {
 app.use(bodyParser());
 
 app.use(router.routes());
+
+app.use(interception);
 
 router.use(userRoute.routes());
 
