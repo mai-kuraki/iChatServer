@@ -10,7 +10,7 @@ module.exports = {
     addUser: async (ctx) => {
         let args = ctx.request.body;
         let user = new UserModel({
-            uid: cuid(),
+            uid: `ID_${cuid()}`,
             email: args.email || '',
             sex: 0,
             pass: crypto.createHash('sha1').update(args.password).digest('hex'),

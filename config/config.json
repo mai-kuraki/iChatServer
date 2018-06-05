@@ -10,5 +10,6 @@
         "db": 1
     },
     "port": 7800,
+    "socketPort": 7900,
     "jwtCert": "f8e38bb17a4b481898"
 }
