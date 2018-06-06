@@ -10,11 +10,12 @@ const config = require('./config/config.json');
 const userRoute = require('./routes/user');
 const interception = require('./middleWare/interception');
 const socketHandle = require('./controllers/socket');
+const socketioJwt = require('socketio-jwt');
 const app = new Koa();
 const store = redisStore({
     host: config.redis.host,
     port: config.redis.port,
-    db: config.redis.db,
+    db: config.redis.sessionDB,
 });
 app.keys = ['session key'];
 app.use(session({
@@ -27,21 +28,21 @@ store.on('connect', () => {
 
 app.use(bodyParser());
 
-app.use(router.routes());
-
 app.use(interception);
+
+app.use(router.routes());
 
 router.use(userRoute.routes());
 
-const server = require('http').createServer();
+const server = require('http').createServer(app.callback());
 const io = require('socket.io')(server);
-io.on('connection', (socket) => {
+io.sockets.on('connection', socketioJwt.authorize({
+        secret: config.jwtCert,
+        timeout: 15000
+    })).on('authenticated', (socket) => {
     socketHandle(socket, io);
 });
-server.listen(config.socketPort, () => {
-    console.log(`socket listen on port ${config.socketPort}`);
-});
 
-app.listen(config.port, () => {
+server.listen(config.port, () => {
     console.log(`app listen on port ${config.port}`);
 });

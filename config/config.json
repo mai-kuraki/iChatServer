@@ -7,9 +7,9 @@
     "redis": {
         "host": "127.0.0.1",
         "port": 6379,
-        "db": 1
+        "sessionDB": 1,
+        "db": 2
     },
     "port": 7800,
-    "socketPort": 7900,
     "jwtCert": "f8e38bb17a4b481898"
 }

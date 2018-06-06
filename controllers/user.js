@@ -69,9 +69,9 @@ module.exports = {
                             avator: data.avator,
                             birthday: new Date(data.birthday).getTime(),
                         };
-                        let webToken = jwt.sign(profile, config.jwtCert, { expiresIn: '12h' });
-                        session[webToken] = new Date().getTime();
-                        resolve({code: 200, msg: 'login success!', token: webToken});
+                        let webtoken = jwt.sign(profile, config.jwtCert, { expiresIn: '12h' });
+                        session[webtoken] = new Date().getTime();
+                        resolve({code: 200, msg: 'login success!', token: webtoken});
                     }else {
                         resolve({code: 501, msg: 'email or password error'});
                     }
@@ -83,12 +83,25 @@ module.exports = {
         ctx.body = res;
     },
     logout: (ctx) => {
-        let webToken = ctx.request.headers.webToken;
+        let webtoken = ctx.request.headers.webtoken;
         let session = ctx.session;
-        session[webToken] = null;
+        session[webtoken] = null;
         ctx.body = {
             code: 200,
             msg: 'logout success!'
         }
-    }
+    },
+    getAllUser: async (ctx) => {
+        let res = await new Promise((resolve, reject) => {
+            let webtoken = ctx.request.headers.webtoken;
+            let decoded = jwt.verify(webtoken, config.jwtCert);
+            UserModel.find({uid: {$ne: decoded.uid}},'uid nick avator',(error, data) => {
+                if(error) {
+                    return reject({code: 500, msg: 'db error'});
+                }
+                resolve({code: 200, data: data});
+            })
+        });
+        ctx.body = res;
+    },
 };

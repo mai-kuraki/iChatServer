@@ -8,4 +8,5 @@ const router = require('koa-router')({
 router.put('/add', userController.addUser);
 router.post('/login', userController.login);
 router.get('/logout', userController.logout);
+router.get('/all', userController.getAllUser);
 module.exports = router;
