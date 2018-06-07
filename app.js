@@ -35,7 +35,12 @@ app.use(router.routes());
 router.use(userRoute.routes());
 
 const server = require('http').createServer(app.callback());
-const io = require('socket.io')(server);
+const io = require('socket.io')(server, {
+    // pingInterval: 20000,
+    // pingTimeout: 40000
+    serveClient: false ,
+    transports: ['websocket', 'polling']
+});
 io.sockets.on('connection', socketioJwt.authorize({
         secret: config.jwtCert,
         timeout: 15000
