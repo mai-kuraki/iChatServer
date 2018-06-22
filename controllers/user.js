@@ -69,7 +69,7 @@ module.exports = {
                             avator: data.avator,
                             birthday: new Date(data.birthday).getTime(),
                         };
-                        let webtoken = jwt.sign(profile, config.jwtCert, { expiresIn: '12h' });
+                        let webtoken = jwt.sign(profile, config.jwtCert, { expiresIn: '7days' });
                         session[webtoken] = new Date().getTime();
                         resolve({code: 200, msg: 'login success!', token: webtoken});
                     }else {
