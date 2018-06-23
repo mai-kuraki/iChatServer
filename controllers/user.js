@@ -112,6 +112,11 @@ module.exports = {
         const reader = fs.createReadStream(file.path);
         const fileName = `${uniqueString()}.jpg`;
         try{
+            fs.accessSync('static');
+        }catch (e) {
+            fs.mkdirSync('static');
+        }
+        try{
             fs.accessSync('static/uploads');
         }catch (e) {
             fs.mkdirSync('static/uploads');
