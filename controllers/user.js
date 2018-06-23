@@ -130,14 +130,24 @@ module.exports = {
         let res = await new Promise((resolve, reject) => {
             reader.pipe(stream);
             stream.on('finish', () => {
-                resolve({
-                    code: 200,
-                    path: `/uploads/avator/${fileName}`,
-                    msg: 'upload success!'
+                let webtoken = ctx.request.headers.webtoken;
+                let decoded = jwt.verify(webtoken, config.jwtCert);
+                UserModel.update({uid: decoded.uid}, {$set: {avator: `/uploads/avator/${fileName}`}}, (error) => {
+                   if(error) {
+                       return reject({
+                           code: 500,
+                           msg: 'update avator error!'
+                       })
+                   }
+                    resolve({
+                        code: 200,
+                        path: `/uploads/avator/${fileName}`,
+                        msg: 'upload success!'
+                    });
                 });
             });
             stream.on('error', (error) => {
-                console.log(error)
+                console.log(error);
                 reject({
                     code: 500,
                     msg: 'upload error!'
