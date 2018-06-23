@@ -6,10 +6,13 @@
     <script src="https://cdn.bootcss.com/socket.io/2.1.1/socket.io.js"></script>
 </head>
 <body>
-
+<form action="http://192.168.1.103:7800/user/upload" method="post" enctype="multipart/form-data">
+    <input type="file" name="file">
+    <input type="submit">
+</form>
 </body>
 <script>
-    var socket = io.connect('http://127.0.0.1:7900');
+    var socket = io.connect('http://127.0.0.1:7800');
     socket.on('news', function (data) {
         console.log(data);
         socket.emit('other event', { my: 'data' });

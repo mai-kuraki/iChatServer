@@ -5,12 +5,13 @@ const session = require('koa-generic-session');
 const redisStore = require('koa-redis');
 const Koa = require('koa');
 const router = require('koa-router')();
-const bodyParser = require('koa-bodyparser');
+const koaBody = require('koa-body');
 const config = require('./config/config.json');
 const userRoute = require('./routes/user');
 const interception = require('./middleWare/interception');
 const socketHandle = require('./controllers/socket');
 const socketioJwt = require('socketio-jwt');
+const static = require('koa-static');
 const app = new Koa();
 const store = redisStore({
     host: config.redis.host,
@@ -26,7 +27,12 @@ store.on('connect', () => {
     console.log('redis store is connected')
 });
 
-app.use(bodyParser());
+app.use(static('static'));
+
+app.use(koaBody({
+    multipart: true,
+    formLimit: '5mb'
+}));
 
 app.use(interception);
 

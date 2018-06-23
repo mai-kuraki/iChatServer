@@ -6,6 +6,9 @@ const crypto = require('crypto');
 const jwt = require('jsonwebtoken');
 const config = require('../config/config.json');
 const cuid = require('cuid');
+const fs = require('fs');
+const path = require('path');
+const uniqueString = require('unique-string');
 module.exports = {
     addUser: async (ctx) => {
         let args = ctx.request.body;
@@ -104,4 +107,38 @@ module.exports = {
         });
         ctx.body = res;
     },
+    upload: async (ctx) => {
+        const file = ctx.request.files.file;
+        const reader = fs.createReadStream(file.path);
+        const fileName = `${uniqueString()}.jpg`;
+        try{
+            fs.accessSync('static/uploads');
+        }catch (e) {
+            fs.mkdirSync('static/uploads');
+        }
+        try{
+            fs.accessSync('static/uploads/avator');
+        }catch (e) {
+            fs.mkdirSync('static/uploads/avator');
+        }
+        const stream = fs.createWriteStream(path.join('static/uploads/avator', fileName));
+        let res = await new Promise((resolve, reject) => {
+            reader.pipe(stream);
+            stream.on('finish', () => {
+                resolve({
+                    code: 200,
+                    path: `/uploads/avator/${fileName}`,
+                    msg: 'upload success!'
+                });
+            });
+            stream.on('error', (error) => {
+                console.log(error)
+                reject({
+                    code: 500,
+                    msg: 'upload error!'
+                });
+            });
+        });
+        ctx.body = res;
+    }
 };
