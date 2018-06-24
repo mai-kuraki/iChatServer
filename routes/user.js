@@ -10,4 +10,5 @@ router.post('/login', userController.login);
 router.get('/logout', userController.logout);
 router.get('/all', userController.getAllUser);
 router.post('/upload', userController.upload);
+router.post('/update', userController.update);
 module.exports = router;

@@ -9,6 +9,32 @@ const cuid = require('cuid');
 const fs = require('fs');
 const path = require('path');
 const uniqueString = require('unique-string');
+
+const updateJWT = async (uid, ctx) => {
+    let res = await new Promise((resolve, reject) => {
+        UserModel.findOne({uid: uid}, (error, data) => {
+            if(!error) {
+                let profile = {
+                    uid: data.uid,
+                    email: data.email,
+                    sex: data.sex,
+                    nick: data.nick,
+                    avator: data.avator,
+                    birthday: new Date(data.birthday).getTime(),
+                };
+                let session = ctx.session;
+                let webtoken = jwt.sign(profile, config.jwtCert, { expiresIn: '7days' });
+                session[webtoken] = new Date().getTime();
+                resolve(webtoken);
+            }else {
+                console.log(error);
+                reject(null);
+            }
+        })
+    });
+    return res;
+};
+
 module.exports = {
     addUser: async (ctx) => {
         let args = ctx.request.body;
@@ -54,7 +80,6 @@ module.exports = {
         }
     },
     login: async (ctx) => {
-        let session = ctx.session;
         let args = ctx.request.body;
         let res = await new Promise((resolve, reject) => {
             UserModel.findOne({email: args.email}, (error, data) => {
@@ -64,17 +89,12 @@ module.exports = {
                 if(data) {
                     let password = crypto.createHash('sha1').update(args.password).digest('hex');
                     if(password === data.pass) {
-                        let profile = {
-                            uid: data.uid,
-                            email: data.email,
-                            sex: data.sex,
-                            nick: data.nick,
-                            avator: data.avator,
-                            birthday: new Date(data.birthday).getTime(),
-                        };
-                        let webtoken = jwt.sign(profile, config.jwtCert, { expiresIn: '7days' });
-                        session[webtoken] = new Date().getTime();
-                        resolve({code: 200, msg: 'login success!', token: webtoken});
+                        let JWTP = updateJWT(data.uid, ctx);
+                        JWTP.then((token) => {
+                            resolve({code: 200, msg: 'login success!', token: token});
+                        }).catch(() => {
+                            resolve({code: 500, msg: 'jwt error'});
+                        });
                     }else {
                         resolve({code: 501, msg: 'email or password error'});
                     }
@@ -96,8 +116,7 @@ module.exports = {
     },
     getAllUser: async (ctx) => {
         let res = await new Promise((resolve, reject) => {
-            let webtoken = ctx.request.headers.webtoken;
-            let decoded = jwt.verify(webtoken, config.jwtCert);
+            let decoded = ctx.decoded;
             UserModel.find({uid: {$ne: decoded.uid}},'uid nick avator',(error, data) => {
                 if(error) {
                     return reject({code: 500, msg: 'db error'});
@@ -130,8 +149,7 @@ module.exports = {
         let res = await new Promise((resolve, reject) => {
             reader.pipe(stream);
             stream.on('finish', () => {
-                let webtoken = ctx.request.headers.webtoken;
-                let decoded = jwt.verify(webtoken, config.jwtCert);
+                let decoded = ctx.decoded;
                 UserModel.update({uid: decoded.uid}, {$set: {avator: `/uploads/avator/${fileName}`}}, (error) => {
                    if(error) {
                        return reject({
@@ -139,11 +157,17 @@ module.exports = {
                            msg: 'update avator error!'
                        })
                    }
-                    resolve({
-                        code: 200,
-                        path: `/uploads/avator/${fileName}`,
-                        msg: 'upload success!'
-                    });
+                   let JWTP = updateJWT(data.uid, ctx);
+                   JWTP.then((token) => {
+                       resolve({
+                           code: 200,
+                           token: token,
+                           path: `/uploads/avator/${fileName}`,
+                           msg: 'upload success!'
+                       });
+                   }).catch(() => {
+                       resolve({code: 500, msg: 'jwt error'});
+                   });
                 });
             });
             stream.on('error', (error) => {
@@ -151,6 +175,31 @@ module.exports = {
                 reject({
                     code: 500,
                     msg: 'upload error!'
+                });
+            });
+        });
+        ctx.body = res;
+    },
+    update: async (ctx) => {
+        let args = ctx.request.body;
+        let decoded = ctx.decoded;
+        let res = await new Promise((resolve, reject) => {
+            UserModel.update({uid: decoded.uid}, {$set: args}, (error) => {
+                if(error) {
+                    return reject({
+                        code: 500,
+                        msg: 'update profile error!'
+                    })
+                }
+                let JWTP = updateJWT(data.uid, ctx);
+                JWTP.then((token) => {
+                    resolve({
+                        code: 200,
+                        token: token,
+                        msg: 'update success!'
+                    });
+                }).catch(() => {
+                    resolve({code: 500, msg: 'jwt error'});
                 });
             });
         });
