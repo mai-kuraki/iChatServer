@@ -1,0 +1,16 @@
+{
+    "mongodb": {
+        "host": "127.0.0.1",
+        "port": 27017,
+        "dbName": "ichat"
+    },
+    "redis": {
+        "host": "127.0.0.1",
+        "port": 6379,
+        "sessionDB": 1,
+        "db": 2,
+        "password": ""
+    },
+    "port": 7800,
+    "jwtCert": "jwtCert"
+}
