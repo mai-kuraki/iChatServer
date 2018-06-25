@@ -62,3 +62,4 @@ typings/
 .idea/
 uploads/avator
 build/
+config/config.json
