@@ -2,6 +2,7 @@
  * Created by zhengliuyang on 2018/6/1.
  */
 const session = require('koa-generic-session');
+const redis = require('redis');
 const redisStore = require('koa-redis');
 const Koa = require('koa');
 const router = require('koa-router')();
@@ -13,10 +14,14 @@ const socketHandle = require('./controllers/socket');
 const socketioJwt = require('socketio-jwt');
 const static = require('koa-static');
 const app = new Koa();
-const store = redisStore({
+const redisClient = redis.createClient({
     host: config.redis.host,
     port: config.redis.port,
-    db: config.redis.sessionDB,
+    db: config.redis.sessionDB
+});
+redisClient.auth(config.redis.password);
+const store = redisStore({
+    client: redisClient,
 });
 app.keys = ['session key'];
 app.use(session({

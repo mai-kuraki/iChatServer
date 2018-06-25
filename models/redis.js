@@ -8,6 +8,7 @@ const client = redis.createClient({
     port: config.redis.port,
     db: config.redis.db,
 });
+client.auth(config.redis.password);
 client.on("connect", () => {
     console.log('redis connected');
 });
