@@ -157,7 +157,7 @@ module.exports = {
                            msg: 'update avator error!'
                        })
                    }
-                   let JWTP = updateJWT(data.uid, ctx);
+                   let JWTP = updateJWT(decoded.uid, ctx);
                    JWTP.then((token) => {
                        resolve({
                            code: 200,
@@ -191,7 +191,7 @@ module.exports = {
                         msg: 'update profile error!'
                     })
                 }
-                let JWTP = updateJWT(data.uid, ctx);
+                let JWTP = updateJWT(decoded.uid, ctx);
                 JWTP.then((token) => {
                     resolve({
                         code: 200,
