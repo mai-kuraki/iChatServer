@@ -36,7 +36,7 @@ const updateJWT = async (uid, ctx) => {
 };
 
 module.exports = {
-    addUser: async (ctx) => {
+    add: async (ctx) => {
         let args = ctx.request.body;
         let user = new UserModel({
             uid: `ID_${cuid()}`,
@@ -114,7 +114,7 @@ module.exports = {
             msg: 'logout success!'
         }
     },
-    getAllUser: async (ctx) => {
+    all: async (ctx) => {
         let res = await new Promise((resolve, reject) => {
             let decoded = ctx.decoded;
             UserModel.find({uid: {$ne: decoded.uid}},'uid nick avator',(error, data) => {
@@ -202,6 +202,59 @@ module.exports = {
                     resolve({code: 500, msg: 'jwt error'});
                 });
             });
+        });
+        ctx.body = res;
+    },
+    search: async (ctx) => {
+        let args = ctx.request.query;
+        if(!args.q) {
+            return ctx.body = {code: 500, msg: 'missing parameters'}
+        }
+        let res = await new Promise((resolve, reject) => {
+            UserModel.find({$or: [
+                {email: {$regex: args.q, $options:'i'}},
+                {uid: {$regex: args.q}}
+            ]},'uid nick avator sex email', (error, data) => {
+                if(error) {
+                    return reject({
+                        code: 500,
+                        msg: 'search error!'
+                    });
+                }
+                resolve({
+                    code: 200,
+                    data: data,
+                })
+            })
+        });
+        ctx.body = res;
+    },
+    profile: async (ctx) => {
+        let args = ctx.request.query;
+        if(!args.uid && !args.email) {
+            return ctx.body = {code: 500, msg: 'missing parameters'}
+        }
+        let q = {};
+        if(args.uid) {
+            q.uid = args.uid;
+        }
+        if(args.email) {
+            q.email = args.email;
+        }
+        console.log(q)
+        let res = await new Promise((resolve, reject) => {
+            UserModel.findOne(q,'uid nick avator sex email birthday', (error, data) => {
+                if(error) {
+                    return reject({
+                        code: 500,
+                        msg: 'get user error!'
+                    });
+                }
+                resolve({
+                    code: 200,
+                    data: data,
+                })
+            })
         });
         ctx.body = res;
     }
