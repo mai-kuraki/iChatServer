@@ -6,13 +6,13 @@ const {mongoClient} = require('../mongo');
 
 const userSchema = new Schema(
     {
-        uid: String,
-        email: String,
-        sex: Number,
-        pass: String,
-        nick: String,
-        avator: String,
-        birthday: { type: Date, default: Date.now },
+        uid: String, //uid
+        email: String, //邮箱
+        sex: Number, //性别 0:未知 1:男 2:女
+        pass: String, //密码
+        nick: String, //昵称
+        avator: String, //邮箱
+        birthday: { type: Date, default: Date.now }, //生日
     },
 );
 

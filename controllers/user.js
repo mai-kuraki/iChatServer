@@ -2,6 +2,7 @@
  * Created by zhengliuyang on 2018/6/1.
  */
 const UserModel = require('../models/schema/user');
+const NoticeModel = require('../models/schema/notice');
 const crypto = require('crypto');
 const jwt = require('jsonwebtoken');
 const config = require('../config/config.json');
@@ -9,6 +10,8 @@ const cuid = require('cuid');
 const fs = require('fs');
 const path = require('path');
 const uniqueString = require('unique-string');
+const redis = require('../models/redis');
+const eventEmitter = require('./emitter');
 
 const updateJWT = async (uid, ctx) => {
     let res = await new Promise((resolve, reject) => {
@@ -241,7 +244,6 @@ module.exports = {
         if(args.email) {
             q.email = args.email;
         }
-        console.log(q)
         let res = await new Promise((resolve, reject) => {
             UserModel.findOne(q,'uid nick avator sex email birthday', (error, data) => {
                 if(error) {
@@ -255,6 +257,37 @@ module.exports = {
                     data: data,
                 })
             })
+        });
+        ctx.body = res;
+    },
+    apply: async (ctx) => {
+        let args = ctx.request.body;
+        let obj = {
+            from: args.uid,
+            to: args.to,
+            type: 1,
+            msg: args.msg || '',
+        };
+        let notice = new NoticeModel(obj);
+        let res = await new Promise((resolve, reject) => {
+            notice.save((err) => {
+                if(err) {
+                    return reject({
+                        code: 500,
+                        msg: 'save error!'
+                    })
+                }
+                resolve({
+                    code: 200,
+                })
+            });
+        });
+        redis.get(args.to, (error, reply) => {
+            // console.log(reply)
+            if(reply) {
+
+            }
+            eventEmitter.emit('notice', obj)
         });
         ctx.body = res;
     }

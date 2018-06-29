@@ -2,6 +2,7 @@
  * Created by zhengliuyang on 2018/6/5.
  */
 const redis = require('../models/redis');
+const eventEmitter = require('./emitter');
 const handleConnect = (socket) => {
     let uid = socket.decoded_token.uid;
     let socketId = socket.id;
@@ -24,4 +25,11 @@ module.exports = (socket, io) => {
         redis.del(uid);
         console.log(`${uid} is disconnect for reason ${reason}`);
     });
+    if(eventEmitter.listeners('notice').length === 0) {
+        eventEmitter.on('notice', (data) => {
+            redis.get(data.to, (error, reply) => {
+                socket.to(reply).emit('notice', data);
+            });
+        });
+    }
 };
