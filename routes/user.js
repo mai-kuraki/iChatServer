@@ -14,4 +14,5 @@ router.get('/profile', userController.profile);
 router.post('/upload', userController.upload);
 router.put('/update', userController.update);
 router.post('/apply', userController.apply);
+router.get('/notice', userController.notice);
 module.exports = router;

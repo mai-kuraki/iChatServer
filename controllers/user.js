@@ -290,5 +290,23 @@ module.exports = {
             eventEmitter.emit('notice', obj)
         });
         ctx.body = res;
+    },
+    notice: async (ctx) => {
+        let res = await new Promise((resolve, reject) => {
+            let decoded = ctx.decoded;
+            NoticeModel.find({to: decoded.uid}, 'from to type msg timestamps handle result', (error, data) => {
+                if(error) {
+                    return reject({
+                        code: 500,
+                        msg: 'get notice error!'
+                    });
+                }
+                resolve({
+                    code: 200,
+                    data: data,
+                })
+            })
+        });
+        ctx.body = res;
     }
 };
