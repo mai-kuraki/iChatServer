@@ -294,18 +294,21 @@ module.exports = {
     notice: async (ctx) => {
         let res = await new Promise((resolve, reject) => {
             let decoded = ctx.decoded;
-            NoticeModel.find({to: decoded.uid}, 'from to type msg timestamps handle result', (error, data) => {
+            NoticeModel.find({to: decoded.uid, handle: false}, 'from to type msg timestamps handle result', (error, data) => {
                 if(error) {
                     return reject({
                         code: 500,
                         msg: 'get notice error!'
                     });
                 }
+                NoticeModel.update({to: decoded.uid}, {$set: {handle: true}}, {multi: true}, (err, doc) => {
+                    if(err) console.log(err);
+                });
                 resolve({
                     code: 200,
                     data: data,
                 })
-            })
+            }).sort({_id: -1});
         });
         ctx.body = res;
     }
